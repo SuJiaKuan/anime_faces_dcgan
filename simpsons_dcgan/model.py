@@ -85,3 +85,13 @@ class Discriminator(nn.Module):
 
     def forward(self, input):
         return self._network(input)
+
+
+def init_weights(module):
+    classname = module.__class__.__name__
+
+    if 'Conv' in classname:
+        nn.init.normal_(module.weight.data, mean=0.0, std=0.02)
+    elif 'BatchNorm' in classname:
+        nn.init.normal_(module.weight.data, mean=1.0, std=0.02)
+        nn.init.constant_(module.bias.data, 0)
