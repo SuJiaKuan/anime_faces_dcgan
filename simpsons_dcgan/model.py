@@ -3,12 +3,12 @@ import torch.nn as nn
 
 class Generator(nn.Module):
 
-    def __init__(self, size_z):
+    def __init__(self, z_size):
         super(Generator, self).__init__()
 
         self._network = nn.Sequential(
             # From input z into 1024 x 4 x4.
-            nn.ConvTranspose2d(size_z,
+            nn.ConvTranspose2d(z_size,
                                1024,
                                4,
                                stride=1,
