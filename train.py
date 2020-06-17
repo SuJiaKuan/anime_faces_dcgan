@@ -9,10 +9,10 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
 
-from simpsons_dcgan.data import load_data
-from simpsons_dcgan.model import Generator
-from simpsons_dcgan.model import Discriminator
-from simpsons_dcgan.model import init_weights
+from dcgan.data import load_data
+from dcgan.model import Generator
+from dcgan.model import Discriminator
+from dcgan.model import init_weights
 
 
 REAL_LABEL = 1
