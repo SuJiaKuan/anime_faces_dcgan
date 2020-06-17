@@ -1,3 +1,3 @@
-# Simpsons DCGAN
+# Anime Face DCGAN
 
-DCGAN to generate images of Simpsons faces.
+DCGAN to generate images of anime faces.
