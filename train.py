@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument(
         '--data_folder',
         type=str,
-        default='simpsons_faces',
+        default='anime_faces',
         help='Folder that contains training images of Simpsons faces',
     )
     parser.add_argument(
@@ -69,7 +69,7 @@ def parse_args():
     parser.add_argument(
         '--num_epochs',
         type=int,
-        default=100,
+        default=20,
         help='Number of training epochs',
     )
     parser.add_argument(
