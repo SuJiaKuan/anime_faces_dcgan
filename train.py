@@ -62,7 +62,7 @@ def parse_args():
     )
     parser.add_argument(
         '--beta1',
-        type=int,
+        type=float,
         default=0.5,
         help='Beta1 for Adam optimizer',
     )
