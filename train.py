@@ -85,27 +85,35 @@ def parse_args():
 
 
 def main(args):
+    # Delete previous generated folder if it exists.
     if os.path.exists(args.output):
         shutil.rmtree(args.output)
 
+    # Create a folder to put the generated images.
     generated_path = os.path.join(args.output, 'generated')
     pathlib.Path(generated_path).mkdir(parents=True, exist_ok=True)
 
+    # Load real images from disk.
     dataloader = load_data(args.data_folder,
                            args.image_size,
                            args.batch_size,
                            args.data_workers)
 
+    # Choose device (GPU or CPU).
     device = torch.device('cuda:0' if (torch.cuda.is_available()) else 'cpu')
 
+    # Constructure the network architectures for Generator and Discrimiantor.
     net_g = Generator(args.z_size).to(device)
     net_d = Discriminator().to(device)
 
+    # Initializa the weights of Generator and Discriminator.
     net_g.apply(init_weights)
     net_d.apply(init_weights)
 
+    # Use Binary Cross Entropy as the loss function.
     criterion = nn.BCELoss()
 
+    # Use Adam as optimizer for Generator and Discriminator.
     optimizer_g = optim.Adam(net_g.parameters(),
                              lr=args.lr,
                              betas=(args.beta1, 0.999))
@@ -113,13 +121,19 @@ def main(args):
                              lr=args.lr,
                              betas=(args.beta1, 0.999))
 
+    # Allocate a list of fixed noises to see the generated images for different
+    # training iteration / epoch.
     fixed_noise = torch.randn(64, args.z_size, 1, 1, device=device)
 
+    # Create list to record the loss of Generator and Discriminator for each
+    # training iteration.
     losses_g = []
     losses_d = []
 
     for epoch in range(args.num_epochs):
         for batch_idx, data in enumerate(dataloader, 0):
+            # Training for Discriminator, step 1: treat real images as postive
+            # examples.
             net_d.zero_grad()
             imgs_real = data[0].to(device)
             batch_size = imgs_real.shape[0]
@@ -129,6 +143,8 @@ def main(args):
             err_d_real.backward(retain_graph=True)
             d_x = predictions.mean().item()
 
+            # Training for Discriminator, step 1: treat generated images as
+            # negative examples.
             noise = torch.randn(batch_size, args.z_size, 1, 1, device=device)
             imgs_fake = net_g(noise)
             labels.fill_(FAKE_LABEL)
@@ -139,6 +155,8 @@ def main(args):
             err_d = err_d_real + err_d_fake
             optimizer_d.step()
 
+            # Training for Generator: treat generated images as postive
+            # examples.
             net_g.zero_grad()
             labels.fill_(REAL_LABEL)
             predictions = net_d(imgs_fake).view(-1)
@@ -147,6 +165,7 @@ def main(args):
             d_g_z2 = predictions.mean().item()
             optimizer_g.step()
 
+            # Print training information periodically.
             if batch_idx % 10 == 0:
                 print(f'[{epoch}/{args.num_epochs}]'
                       f'[{batch_idx}/{len(dataloader)}]'
@@ -155,9 +174,11 @@ def main(args):
                       f'\tD(x): {d_x:.4f}'
                       f'\tD(G(z)): {d_g_z1:.4f} / {d_g_z2:.4f}')
 
+            # Append current Generator and Discriminator loss to loss lists.
             losses_d.append(err_d.item())
             losses_g.append(err_g.item())
 
+            # Generate fake image and save it to disk periodically.
             if (batch_idx % 10 == 0) or (batch_idx == len(dataloader) - 1):
                 with torch.no_grad():
                     imgs_fake = net_g(fixed_noise).detach().cpu()
@@ -168,6 +189,7 @@ def main(args):
                                              f'{epoch}_{batch_idx}.jpg')
                     vutils.save_image(grid_img, save_path)
 
+    # Draw a plot for losses and save it to disk.
     plt.figure(figsize=(10, 5))
     plt.title('Generator and Discriminator Loss During Training')
     plt.plot(losses_g, label='Generator')
