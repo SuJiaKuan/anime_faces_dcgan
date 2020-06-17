@@ -157,5 +157,8 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# Default training images directory
+anime_faces
+
 # Default output directory
 /output
